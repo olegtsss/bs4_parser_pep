@@ -1,8 +1,8 @@
 import logging
 
-# Импорт базового класса ошибок библиотеки request.
 from requests import RequestException
 
+from constants import FIND_TAG_ERROR_MESSAGE, HTTP_GET_ERROR_MESSAGE
 from exceptions import ParserFindTagException
 
 
@@ -14,7 +14,7 @@ def get_response(session, url):
         return response
     except RequestException:
         logging.exception(
-            f'Возникла ошибка при загрузке страницы {url}',
+            HTTP_GET_ERROR_MESSAGE.format(url=url),
             stack_info=True
         )
 
@@ -23,7 +23,7 @@ def find_tag(soup, tag, attrs=None):
     """Перехват ошибки поиска тегов."""
     searched_tag = soup.find(tag, attrs=(attrs or {}))
     if searched_tag is None:
-        error_msg = f'Не найден тег {tag} {attrs}'
+        error_msg = FIND_TAG_ERROR_MESSAGE.format(tag=tag, attrs=attrs)
         logging.error(error_msg, stack_info=True)
         raise ParserFindTagException(error_msg)
     return searched_tag
