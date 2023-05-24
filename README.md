@@ -10,8 +10,7 @@
 Python 3.7, bs4, requests-cache, argparse, logging
 
 ## Как запустить проект:
-- Клонировать репозиторий, перейти в него в командной строке:
-
+Клонировать репозиторий, перейти в него в командной строке:
 ```
 git clone https://github.com/olegtsss/parser_yap.git
 cd parser_yap
@@ -23,9 +22,8 @@ pip install -r requirements.txt
 
 
 ## Доступные аргументы командной строки
-Для просмотра режимов работы парсера в терминале введите команду 
-с именованным аргументом ```-h``` или ```--help```:  
-
+Для просмотра режимов работы парсера в терминале введите команду ```-h```
+или ```--help```:  
 ```
 python src/main.py -h
 ```
@@ -51,11 +49,10 @@ optional arguments:
 
 ## Вывод информации осуществляется:  
 - в консоль (stdout);  
-- в консоль в табличном виде (аргументы ```-o {pretty}```);
-- в формате csv (аргументы ```-o {file}```) в папку ```/src/results/```;
+- в консоль в табличном виде (```-o pretty```);
+- в формате csv (```-o file```);
 
-Настроено логирование работы парсера.  
-Лог сохраняется в папку ```/src/logs/```.
+Настроено логирование работы парсера (```/src/logs/```).
 
 ## Примеры запуска:
 
@@ -78,10 +75,6 @@ python src/main.py download
 Запуск парсера и получение статистики по PEP
 python src/main.py pep
 ```
-
-# Разработчики
-
-[olegtsss](https://github.com/olegtsss)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)
