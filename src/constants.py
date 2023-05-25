@@ -6,7 +6,6 @@ MAIN_PEP_URL = 'https://peps.python.org/'
 
 PRETTY_OUTPUT = 'pretty'
 FILE_OUTPUT = 'file'
-DEFAULT_OUTPUT = None
 
 LOG_FORMAT = '"%(asctime)s - [%(levelname)s] - %(message)s"'
 DT_FORMAT = '%d.%m.%Y %H:%M:%S'

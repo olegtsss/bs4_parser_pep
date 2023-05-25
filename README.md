@@ -5,11 +5,11 @@
 - главная страница c информацией о PEP (https://peps.python.org/)
 - страница для скачивания документации Python (https://docs.python.org/3/download.html)
 
-# Используемые технологии и библиотеки:
+### Используемые технологии:
 
-Python 3.7, bs4, requests-cache
+Python 3.7, кеширование веб-страниц, парсинг HTML
 
-## Как запустить проект:
+### Как запустить проект:
 Клонировать репозиторий, перейти в него в командной строке:
 ```
 git clone https://github.com/olegtsss/parser_yap.git
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ```
 
 
-## Доступные аргументы командной строки
+### Доступные аргументы командной строки
 Для просмотра режимов работы парсера в терминале введите команду ```-h```
 или ```--help```:  
 ```
@@ -47,14 +47,14 @@ optional arguments:
                         Дополнительные способы вывода данных
 ```
 
-## Вывод информации осуществляется:  
+### Вывод информации осуществляется:  
 - в консоль (stdout);  
 - в консоль в табличном виде (```-o pretty```);
 - в формате csv (```-o file```);
 
 Настроено логирование работы парсера (```/src/logs/```).
 
-## Примеры запуска:
+### Примеры запуска:
 
 ```
 Запуск парсера информации из статей о нововведениях в Python
@@ -75,8 +75,8 @@ python src/main.py download
 Запуск парсера и получение статистики по PEP
 python src/main.py pep
 ```
-# Разработчик:
-[olegtsss](https://github.com/olegtsss)
+### Разработчик:
+[Тимощук Олег](https://github.com/olegtsss)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)

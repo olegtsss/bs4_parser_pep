@@ -4,9 +4,8 @@ import logging
 
 from prettytable import PrettyTable
 
-from constants import (BASE_DIR, DATETIME_FORMAT, DEFAULT_OUTPUT, FILE_OUTPUT,
-                       PEPS_DIR, PRETTY_OUTPUT)
-
+from constants import (BASE_DIR, DATETIME_FORMAT, FILE_OUTPUT, PEPS_DIR,
+                       PRETTY_OUTPUT)
 
 FILE_SAVE_MESSAGE = 'Файл с результатами был сохранён: {file_path}'
 
@@ -33,8 +32,7 @@ def file_output(results, cli_args):
     results_dir.mkdir(exist_ok=True)
     # Получаем режим работы парсера из аргументов командной строки
     parser_mode = cli_args.mode
-    now = dt.datetime.now()
-    now_formatted = now.strftime(DATETIME_FORMAT)
+    now_formatted = dt.datetime.now().strftime(DATETIME_FORMAT)
     # 2021-06-18_07-40-41
     file_path = results_dir / f'{parser_mode}_{now_formatted}.csv'
     with open(file_path, 'w', encoding='utf-8') as file:
@@ -45,7 +43,7 @@ def file_output(results, cli_args):
 OUTPUT_FORMAT = {
     PRETTY_OUTPUT: pretty_output,
     FILE_OUTPUT: file_output,
-    DEFAULT_OUTPUT: default_output
+    None: default_output
 }
 
 

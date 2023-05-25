@@ -5,7 +5,6 @@ from collections import defaultdict
 from urllib.parse import urljoin, urlparse
 
 import requests_cache
-from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
@@ -13,7 +12,7 @@ from constants import (BASE_DIR, DOWNLOAD_DIR, EXPECTED_STATUS, MAIN_DOC_URL,
                        MAIN_PEP_URL)
 from exceptions import ParserFindTagException
 from outputs import control_output
-from utils import find_tag, get_response
+from utils import create_soup, find_tag
 
 
 LATEST_VERSIONS_MESSAGE = 'Ничего не нашлось'
@@ -35,41 +34,33 @@ WHATS_NEW_HEAD = ('Ссылка на статью', 'Заголовок', 'Ре�
 LATEST_VERSIONS_HEAD = ('Ссылка на документацию', 'Версия', 'Статус')
 
 
-def http_get_and_soup_create(session, url):
-    response = get_response(session, url)
-    if response is None:
-        return
-    return BeautifulSoup(response.text, features='lxml')
-
-
 def whats_new(session):
     """
     Запуск парсера информации из статей о нововведениях в Python.
     https://docs.python.org/3/whatsnew/
     """
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    soup = http_get_and_soup_create(session, whats_new_url)
-    if soup is None:
-        return
+    soup = create_soup(session, whats_new_url)
     sections_by_python = soup.select(
-        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1')
+        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1 a')
     results = []
+    logs = []
     for section in tqdm(sections_by_python):
-        version_a_tag = find_tag(section, 'a')
-        href = version_a_tag['href']
-        version_link = urljoin(whats_new_url, href)
-        soup = http_get_and_soup_create(session, version_link)
-        if soup is None:
-            # Если не загрузится, программа перейдёт к следующей ссылке
-            logging.info(RESPONSE_IS_NONE.format(url=version_link))
-            continue
-        results.append(
-            (
-                version_link,
-                find_tag(soup, 'h1').text,
-                find_tag(soup, 'dl').text.replace('\n', ' ')
+        version_link = urljoin(whats_new_url, section['href'])
+        try:
+            soup = create_soup(session, version_link)
+            results.append(
+                (
+                    version_link,
+                    find_tag(soup, 'h1').text,
+                    find_tag(soup, 'dl').text.replace('\n', ' ')
+                )
             )
-        )
+        except ConnectionError:
+            # Если не загрузится, программа перейдёт к следующей ссылке
+            logs.append(RESPONSE_IS_NONE.format(url=version_link))
+            continue
+    list(map(logging.info, logs))
     return [WHATS_NEW_HEAD, *results]
 
 
@@ -78,9 +69,7 @@ def latest_versions(session):
     Запуск парсера статусов версий Python.
     https://docs.python.org/3/
     """
-    soup = http_get_and_soup_create(session, MAIN_DOC_URL)
-    if soup is None:
-        return
+    soup = create_soup(session, MAIN_DOC_URL)
     sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
     ul_tags = sidebar.find_all('ul')
     for ul in ul_tags:
@@ -107,9 +96,7 @@ def download(session):
     https://docs.python.org/3/download.html
     """
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    soup = http_get_and_soup_create(session, downloads_url)
-    if soup is None:
-        return
+    soup = create_soup(session, downloads_url)
     pdf_a4_link = soup.select_one(
         'table.docutils td > a[href$="pdf-a4.zip"]')['href']
     if pdf_a4_link is None:
@@ -130,9 +117,7 @@ def pep(session):
     Запуск парсера и получение статистики по PEP.
     https://peps.python.org/
     """
-    soup = http_get_and_soup_create(session, MAIN_PEP_URL)
-    if soup is None:
-        return
+    soup = create_soup(session, MAIN_PEP_URL)
     numerical_index_section = find_tag(
         soup, 'section', attrs={'id': 'numerical-index'}
     )
@@ -148,23 +133,24 @@ def pep(session):
         title = pep[2].text
         authors = pep[3].text
         pep_url = urljoin(MAIN_PEP_URL, href)
-        soup = http_get_and_soup_create(session, pep_url)
-        if soup is None:
+        try:
+            soup = create_soup(session, pep_url)
+            dl = find_tag(soup, 'dl')
+            status = dl.find(string='Status').parent.find_next_sibling().text
+            if preview_status is None or status not in preview_status:
+                logs.append(
+                    MISMATCHED_STATUS_MESSAGE.format(
+                        pep_url=pep_url, status=status,
+                        preview_status=preview_status)
+                )
+            peps_result[status] += 1
+            logs.append(
+                f'{number}, {preview_status}, {title}, {authors}, {pep_url}')
+        except ConnectionError:
+            # Если не загрузится, программа перейдёт к следующей ссылке
             logs.append(RESPONSE_IS_NONE.format(url=pep_url))
             continue
-        dl = find_tag(soup, 'dl')
-        status = dl.find(string='Status').parent.find_next_sibling().text
-        if preview_status is None or status not in preview_status:
-            logs.append(
-                MISMATCHED_STATUS_MESSAGE.format(
-                    pep_url=pep_url, status=status,
-                    preview_status=preview_status)
-            )
-        peps_result[status] += 1
-        logs.append(
-            f'{number}, {preview_status}, {title}, {authors}, {pep_url}')
-    for log in logs:
-        logging.info(log)
+    list(map(logging.info, logs))
     return [
         PEPS_HEAD,
         *peps_result.items(),
