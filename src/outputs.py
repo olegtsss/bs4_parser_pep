@@ -4,27 +4,20 @@ import logging
 
 from prettytable import PrettyTable
 
-from constants import BASE_DIR, DATETIME_FORMAT, FILE_SAVE_MESSAGE, PEPS_DIR
+from constants import (BASE_DIR, DATETIME_FORMAT, DEFAULT_OUTPUT, FILE_OUTPUT,
+                       PEPS_DIR, PRETTY_OUTPUT)
 
 
-def control_output(results, cli_args):
-    """Контроль вывода результатов парсинга."""
-    output = cli_args.output
-    if output == 'pretty':
-        pretty_output(results)
-    elif output == 'file':
-        file_output(results, cli_args)
-    else:
-        default_output(results)
+FILE_SAVE_MESSAGE = 'Файл с результатами был сохранён: {file_path}'
 
 
-def default_output(results):
+def default_output(results, *args):
     """Вывод данных в терминал построчно."""
     for row in results:
         print(*row)
 
 
-def pretty_output(results):
+def pretty_output(results, *args):
     """Вывод данных в формате PrettyTable."""
     table = PrettyTable()
     table.field_names = results[0]
@@ -45,6 +38,17 @@ def file_output(results, cli_args):
     # 2021-06-18_07-40-41
     file_path = results_dir / f'{parser_mode}_{now_formatted}.csv'
     with open(file_path, 'w', encoding='utf-8') as file:
-        writer = csv.writer(file, dialect='unix')
-        writer.writerows(results)
+        csv.writer(file, csv.unix_dialect).writerows(results)
     logging.info(FILE_SAVE_MESSAGE.format(file_path=file_path))
+
+
+OUTPUT_FORMAT = {
+    PRETTY_OUTPUT: pretty_output,
+    FILE_OUTPUT: file_output,
+    DEFAULT_OUTPUT: default_output
+}
+
+
+def control_output(results, cli_args):
+    """Контроль вывода результатов парсинга."""
+    OUTPUT_FORMAT.get(cli_args.output)(results, cli_args)

@@ -5,9 +5,9 @@
 - главная страница c информацией о PEP (https://peps.python.org/)
 - страница для скачивания документации Python (https://docs.python.org/3/download.html)
 
-# Используемые технологии:
+# Используемые технологии и библиотеки:
 
-Python 3.7, bs4, requests-cache, argparse, logging
+Python 3.7, bs4, requests-cache
 
 ## Как запустить проект:
 Клонировать репозиторий, перейти в него в командной строке:
@@ -75,6 +75,8 @@ python src/main.py download
 Запуск парсера и получение статистики по PEP
 python src/main.py pep
 ```
+# Разработчик:
+[olegtsss](https://github.com/olegtsss)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)
