@@ -42,7 +42,9 @@ def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     soup = create_soup(session, whats_new_url)
     sections_by_python = soup.select(
-        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1 a')
+        '#what-s-new-in-python div.toctree-wrapper '
+        'li.toctree-l1 a[href$=".html"]'
+    )
     results = []
     logs = []
     for section in tqdm(sections_by_python):
