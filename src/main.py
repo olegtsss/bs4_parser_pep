@@ -43,7 +43,9 @@ def whats_new(session):
     results = []
     logs = []
     for anchor in tqdm(
-        create_soup(session, whats_new_url).select(
+        create_soup(
+            session, whats_new_url
+        ).select(
             '#what-s-new-in-python div.toctree-wrapper '
             'li.toctree-l1 a[href$=".html"]'
         )
