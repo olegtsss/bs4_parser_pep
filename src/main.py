@@ -21,7 +21,7 @@ PARSER_ARGS_MESSAGE = 'Аргументы командной строки: {args
 PARSER_STOP_MESSAGE = 'Парсер завершил работу.'
 ERROR_MESSAGE = 'Ошибка: {error}'
 DOWNLOAD_MESSAGE = 'Архив был загружен и сохранён: {archive_path}'
-RESPONSE_IS_NONE = 'Страница не загружена: {url}'
+RESPONSE_IS_NONE = 'Страница {url} не загружена, ошибка {error}'
 MISMATCHED_STATUS_MESSAGE = (
     'Несовпадающие статусы:\n'
     '{pep_url}\n'
@@ -40,15 +40,15 @@ def whats_new(session):
     https://docs.python.org/3/whatsnew/
     """
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    soup = create_soup(session, whats_new_url)
-    sections_by_python = soup.select(
-        '#what-s-new-in-python div.toctree-wrapper '
-        'li.toctree-l1 a[href$=".html"]'
-    )
     results = []
     logs = []
-    for section in tqdm(sections_by_python):
-        version_link = urljoin(whats_new_url, section['href'])
+    for anchor in tqdm(
+        create_soup(session, whats_new_url).select(
+            '#what-s-new-in-python div.toctree-wrapper '
+            'li.toctree-l1 a[href$=".html"]'
+        )
+    ):
+        version_link = urljoin(whats_new_url, anchor['href'])
         try:
             soup = create_soup(session, version_link)
             results.append(
@@ -58,10 +58,8 @@ def whats_new(session):
                     find_tag(soup, 'dl').text.replace('\n', ' ')
                 )
             )
-        except ConnectionError:
-            # Если не загрузится, программа перейдёт к следующей ссылке
-            logs.append(RESPONSE_IS_NONE.format(url=version_link))
-            continue
+        except ConnectionError as error:
+            logs.append(RESPONSE_IS_NONE.format(url=version_link, error=error))
     list(map(logging.info, logs))
     return [WHATS_NEW_HEAD, *results]
 
@@ -71,10 +69,9 @@ def latest_versions(session):
     Запуск парсера статусов версий Python.
     https://docs.python.org/3/
     """
-    soup = create_soup(session, MAIN_DOC_URL)
-    sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
-    ul_tags = sidebar.find_all('ul')
-    for ul in ul_tags:
+    for ul in create_soup(session, MAIN_DOC_URL).select(
+        'div.sphinxsidebarwrapper ul'
+    ):
         if 'All versions' in ul.text:
             a_tags = ul.find_all('a')
             break
@@ -98,9 +95,9 @@ def download(session):
     https://docs.python.org/3/download.html
     """
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    soup = create_soup(session, downloads_url)
-    pdf_a4_link = soup.select_one(
-        'table.docutils td > a[href$="pdf-a4.zip"]')['href']
+    pdf_a4_link = create_soup(session, downloads_url).select_one(
+        'table.docutils td > a[href$="pdf-a4.zip"]'
+    )['href']
     if pdf_a4_link is None:
         raise ParserFindTagException(LATEST_VERSIONS_MESSAGE)
     archive_url = urljoin(downloads_url, pdf_a4_link)
@@ -148,10 +145,9 @@ def pep(session):
             peps_result[status] += 1
             logs.append(
                 f'{number}, {preview_status}, {title}, {authors}, {pep_url}')
-        except ConnectionError:
+        except ConnectionError as error:
             # Если не загрузится, программа перейдёт к следующей ссылке
-            logs.append(RESPONSE_IS_NONE.format(url=pep_url))
-            continue
+            logs.append(RESPONSE_IS_NONE.format(url=pep_url, error=error))
     list(map(logging.info, logs))
     return [
         PEPS_HEAD,

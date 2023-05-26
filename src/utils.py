@@ -11,7 +11,6 @@ FIND_TAG_ERROR_MESSAGE = 'Не найден тег {tag} {attrs}'
 
 
 def get_response(session, url, encoding='utf-8'):
-    """Перехват ошибки RequestException."""
     try:
         response = session.get(url)
         response.encoding = encoding
@@ -19,7 +18,6 @@ def get_response(session, url, encoding='utf-8'):
     except RequestException as error:
         raise ConnectionError(
             HTTP_GET_ERROR_MESSAGE.format(url=url, error=error),
-            stack_info=True
         )
 
 
@@ -34,7 +32,6 @@ def find_tag(soup, tag, attrs=None):
 
 
 def create_soup(session, url, features='lxml'):
-    """Разбор DOM."""
     return BeautifulSoup(
         get_response(session, url).text,
         features=features
