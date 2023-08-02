@@ -12,8 +12,8 @@ Python 3.7, кеширование веб-страниц, DOM парсинг HTM
 ### Как запустить проект:
 Клонировать репозиторий, перейти в него в командной строке:
 ```
-git clone https://github.com/olegtsss/parser_yap.git
-cd parser_yap
+git clone https://github.com/olegtsss/bs4_parser_pep.git
+cd bs4_parser_pep
 python -m venv venv
 . venv/Scripts/activate
 python -m pip install --upgrade pip
@@ -76,7 +76,7 @@ python src/main.py download
 python src/main.py pep
 ```
 ### Разработчик:
-[Тимощук Олег](https://github.com/olegtsss)
+[olegtsss](https://github.com/olegtsss)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)
